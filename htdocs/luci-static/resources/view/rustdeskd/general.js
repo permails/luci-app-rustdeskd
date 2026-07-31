@@ -733,7 +733,7 @@ return view.extend({
 		o.inputtitle = _('Generate archive');
 		o.onclick = handleCreateBackup;
 
-		o = s.taboption('backup', form.Button, 'restore_backup', _('Restore backup'), _('Restore your RustDesk data from a previously downloaded .tar.gz backup archive. This will overwrite current data and restart the service.'));
+		o = s.taboption('backup', form.Button, 'restore_backup', _('Restore backup'), _('Restore your RustDesk data from a previously downloaded .tar.gz backup archive.') + ' ' + _('This will overwrite current data and restart the service.'));
 		o.inputstyle = 'action important';
 		o.inputtitle = _('Upload archive...');
 		o.onclick = function(ev) {
