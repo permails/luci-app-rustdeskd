@@ -9,203 +9,39 @@ RustDesk is a full-featured open source remote control alternative to TeamViewer
 ## Features
 
 - **Service Management** - Start/Stop/Restart services directly from the UI
-- **Boot Enable/Disable** - Toggle service startup at boot
-- **Status Monitoring** - Real-time status of HBBS and HBBR services with live polling
-- **Public Key Display** - View and copy the generated public key for client configuration
-- **Key Regeneration** - Regenerate encryption keys when needed
-- **Log Viewer** - View service logs with auto-refresh and auto-scroll features
-- **Firewall Hints** - Displays required ports for manual firewall configuration
-- **Tabbed Configuration** - Organized settings for ID Server (hbbs) and Relay Server (hbbr)
-- **Input Validation** - Validates paths, ports, and configuration values
-- **i18n Ready** - Full translation support with POT template
-- **Core Downloader** - Download and update the official RustDesk server core directly from the UI
-
-## Architecture
-
-```
-luci-app-rustdeskd/
-├── Makefile                      # OpenWrt package build file
-├── htdocs/luci-static/resources/view/rustdeskd/
-│   └── general.js                # Main UI view (JavaScript)
-├── po/templates/
-│   └── rustdeskd.pot       # Translation template
-└── root/
-    ├── etc/
-    │   ├── config/rustdeskd        # UCI configuration
-    │   ├── init.d/rustdeskd        # procd init script
-    │   └── uci-defaults/50-luci-rustdeskd  # First-run setup
-    └── usr/share/
-        ├── luci/menu.d/luci-app-rustdeskd.json  # Menu entry
-        └── rpcd/
-            ├── acl.d/luci-app-rustdeskd.json    # ACL permissions
-            └── ucode/rustdeskd.uc               # RPC backend
-```
+- **Core Downloader** - One-click download and update for the official RustDesk server core
+- **Status & Logs** - Real-time service monitoring and log viewer
+- **Configuration** - Easy management of ports, keys, and advanced options
+- **Native Backup** - Fully integrates with OpenWrt's native backup/restore system
+- **Security** - Built-in data validation and safe execution
 
 ## Requirements
-
-### OpenWrt Dependencies
 - OpenWrt 23.05 or later with LuCI installed
-- `luci-base` - LuCI core framework
-- `rpcd` - RPC daemon
-- `rpcd-mod-ucode` - ucode support for rpcd
+- `luci-base`, `rpcd`, `rpcd-mod-ucode`
 
-### RustDesk Server Binaries
-The RustDesk server binaries (`hbbs`, `hbbr`) must be installed separately. They are **not included** in this package. However, you can download and update them directly from the UI using the "Download / Update Core" button in the "Core Management" tab.
 ## Installation
 
-
-### From Source (Development)
-```bash
-# Clone the LuCI repository
-git clone https://github.com/openwrt/luci.git
-cd luci
-
-# Build the package
-make package/luci-app-rustdeskd/compile
-```
-
-### Manual Installation
 1. Copy the application files to your OpenWrt device:
    ```bash
-   # Copy htdocs to /www
    cp -r htdocs/luci-static /www/luci-static/
-   
-   # Copy root files
    cp -r root/* /
-   
-   # Set permissions
    chmod +x /etc/init.d/rustdeskd
    ```
 
-2. Reload rpcd to register the new RPC methods:
+2. Reload rpcd and clear LuCI cache:
    ```bash
    /etc/init.d/rpcd reload
-   ```
-
-3. Clear LuCI cache:
-   ```bash
    rm -rf /tmp/luci-*
    ```
 
-4. Access the interface at: **Services → RustDesk Server**
+3. Access the interface at: **Services → RustDesk Server**
 
-## Configuration
+## Usage
 
-### Binary Location
-The application expects `hbbs` and `hbbr` binaries to be installed in `/usr/bin`.
-
-### Firewall Configuration
-Firewall rules must be configured manually in **Network → Firewall → Traffic Rules**. The application displays the required ports in the Service Status section.
-
-The standard RustDesk port layout is:
-
-| Port | Protocol | Service | Calculation |
-|------|----------|---------|-------------|
-| HBBS-1 | TCP | NAT type test | server_port - 1 |
-| HBBS | TCP/UDP | ID server / Hole punching | server_port |
-| HBBS+2 | TCP | Web client support | server_port + 2 |
-| HBBR | TCP | Relay server | relay_port |
-| HBBR+2 | TCP | Web client support | relay_port + 2 |
-
-**Example:** With default ports (`server_port=21116` and `relay_port=21117`):
-- TCP ports: 21115, 21116, 21117, 21118, 21119
-- UDP port: 21116
-
-### Logging
-Enable logging in General settings to write service output to `/var/log/rustdeskd.log`. View logs in real-time using the Logs tab.
-
-### Database Location
-To protect the router's flash memory lifespan, the database is stored in RAM (`/tmp/rustdesk_db_v2.sqlite3`) during runtime. 
-The init script automatically restores the database from `/etc/rustdesk/db_v2.sqlite3` on startup and syncs it back to flash storage when the service stops. This ensures data persistence across normal reboots while minimizing write wear. *(Note: Data generated during the current session may be lost in the event of unexpected power loss.)*
-
-## Backup and Restore
-
-This plugin fully supports OpenWrt's native configuration backup mechanism. All critical RustDesk Server data (including **encryption keys**, **device lists**, **address books**, and **user accounts**) can be easily preserved.
-
-### 1. Automatic Backup (Recommended)
-When upgrading your OpenWrt firmware or generating a backup from the LuCI interface, all critical RustDesk data is **automatically included**.
-This is because the plugin ships with a `/lib/upgrade/keep.d/rustdeskd` rule that forces OpenWrt to back up the entire `/etc/rustdesk/` directory.
-- **To Backup:** Simply navigate to **System → Backup / Flash Firmware → Generate archive** in LuCI. No extra configuration is required.
-- **To Restore:** Upload your `backup.tar.gz` archive. All RustDesk history and keys will be restored seamlessly.
-
-### 2. Manual Backup (For Migration)
-If you only want to extract RustDesk data independently (e.g., to migrate to another router or server), you just need to back up the `/etc/rustdesk/` directory:
-```bash
-# Archives all public/private keys and the SQLite database
-tar -czvf rustdesk_backup.tar.gz /etc/rustdesk/
-```
-**To restore manually:**
-1. **Stop** the RustDesk service in LuCI.
-2. Extract your backup archive over the `/etc/rustdesk/` directory.
-3. **Start** the service to apply the restored data.
-
-## Client Configuration
-
-After starting the service:
-
-1. Go to the LuCI interface and note your router's IP address
-2. Copy the **Public Key** from the Service Status section
-3. In RustDesk client settings, configure:
-   - **ID Server**: Your router's IP:21116 (or custom port if configured)
-   - **Relay Server**: Your router's IP:21117 (or custom port if configured)
-   - **Key**: The public key from step 2
-
-## UCI Configuration Reference
-
-The configuration is stored in `/etc/config/rustdeskd`:
-
-```uci
-config rustdeskd
-    option enabled '1'              # Enable ID server (hbbs)
-    option enabled_relay '1'        # Enable Relay server (hbbr)
-    
-    # HBBS options
-    option server_port '21116'      # ID server port
-    option server_key ''            # Custom key (optional)
-    
-    # HBBR options  
-    option relay_port '21117'       # Relay server port
-    
-    # Environment variables
-    option server_env_rust_log 'info'
-```
-
-## Security Considerations
-
-This application implements multiple layers of input validation and sanitization to prevent shell injection attacks:
-
-### Frontend Validation (JavaScript)
-All user inputs are validated before being saved to UCI configuration:
-
-| Field Type | Validation |
-|------------|------------|
-| Ports | Numeric only, range 1-65535, supports ranges and comma-separated lists |
-| CIDR masks | Strict IP/prefix format validation |
-| Keys | Alphanumeric and base64 characters only (`A-Za-z0-9+/=`) |
-| URLs | Must start with `http://` or `https://`, no shell metacharacters |
-| Paths | Must start with `/`, no shell metacharacters (`;|&$\`(){}[]<>'"\\!`) |
-| Server lists | Alphanumeric, dots, colons, commas, hyphens, underscores only |
-| Numeric fields | Use LuCI's built-in `uinteger` datatype |
-
-### Backend Validation (Init Script)
-The init script (`/etc/init.d/rustdeskd`) includes comprehensive validation functions that re-validate all configuration values before using them in shell commands:
-
-- `validate_numeric()` - Ensures values contain only digits
-- `validate_port()` - Validates port range (1-65535)
-- `validate_path()` - Checks for shell metacharacters and requires leading `/`
-- `validate_url()` - Validates URL format and rejects dangerous characters
-- `validate_key()` - Allows only base64-safe characters
-- `validate_server_list()` - Allows only hostname/IP-safe characters
-- `validate_cidr()` - Allows only digits, dots, and slash
-- `validate_log_level()` - Whitelist of valid log levels
-
-Invalid values are rejected and logged with warnings to syslog.
-
-### RPC Backend Validation (ucode)
-The RPC backend (`rustdeskd.uc`) validates:
-- `service_action`: Whitelist of allowed actions (`start`, `stop`, `restart`, `reload`, `enable`, `disable`)
-- `get_log` lines parameter: Clamped to range 10-1000
+1. Go to the **Core Management** tab to download the `hbbs` and `hbbr` binaries.
+2. Enable the ID Server and Relay Server in the General Settings.
+3. Apply settings and copy the **Public Key** for your clients.
 
 ## Acknowledgements
 
-This project is heavily inspired by and pays tribute to the original [luci-app-rustdesk-server](https://github.com/superzjg/luci-app-rustdesk-server) created by [**superzjg**](https://github.com/superzjg). We sincerely thank superzjg for pioneering the OpenWrt integration for RustDesk Server and providing a great foundation for the community!
+This project is heavily inspired by and pays tribute to the original [luci-app-rustdesk-server](https://github.com/superzjg/luci-app-rustdesk-server) created by [**superzjg**](https://github.com/superzjg). We sincerely thank superzjg for pioneering the OpenWrt integration for RustDesk Server!
