@@ -2,46 +2,27 @@
 
 [English](README.md) | [中文](README_zh.md)
 
-用于在 OpenWrt 上管理 [RustDesk Server](https://github.com/rustdesk/rustdeskd) 的 LuCI 网页界面。
+**luci-app-rustdeskd** 是一款专为 OpenWrt 路由器打造的 **RustDesk 远程桌面服务器** 可视化管理插件。通过安装这个插件，你可以轻松地把自己的路由器变成一台私有的、完全由你掌控的远程控制中继服务器（开源的 TeamViewer 替代方案）。
 
-RustDesk 是一款功能齐全的开源远程控制替代方案（类似 TeamViewer 和 AnyDesk）。此 LuCI 插件提供了一个基于 Web 的管理界面，用于在 OpenWrt 路由器上配置和管理自建的 RustDesk 服务器组件（hbbs 和 hbbr）。
+## 核心功能
 
-## 功能特性
+- **一键下载内核**：告别繁琐的命令行操作，支持在网页后台一键下载和更新官方 RustDesk 服务器核心（`hbbs` 和 `hbbr`）。
+- **原生备份与恢复**：完美整合 OpenWrt 系统机制，一键无损备份/恢复你的服务器加密公私钥和连接数据，换机重装毫无压力。
+- **傻瓜式可视化管理**：提供直观的运行状态、实时日志查看器，让修改端口、管理密钥变得轻而易举。
 
-- **服务管理** - 直接从用户界面启动/停止/重启服务
-- **核心下载** - 支持在界面一键下载和更新官方 RustDesk 服务器核心文件
-- **状态与日志** - 实时监控服务运行状态并提供可视化的日志查看器
-- **快速配置** - 轻松管理端口、加密密钥和中继参数
-- **数据备份** - 完美整合 OpenWrt 原生备份恢复机制，一键备份数据库和密钥
-- **安全可靠** - 内置严格的数据验证和防注入机制
+## 安装指南
 
-## 运行要求
-- OpenWrt 23.05 或更高版本（需安装 LuCI）
-- 依赖项：`luci-base`, `rpcd`, `rpcd-mod-ucode`
-
-## 安装说明
-
-1. 将应用文件复制到 OpenWrt 设备：
+1. 将文件直接放入 OpenWrt 对应目录：
    ```bash
    cp -r htdocs/luci-static /www/luci-static/
    cp -r root/* /
    chmod +x /etc/init.d/rustdeskd
    ```
 
-2. 重新加载 rpcd 并清除缓存：
+2. 刷新服务和缓存：
    ```bash
    /etc/init.d/rpcd reload
    rm -rf /tmp/luci-*
    ```
 
-3. 访问界面：**服务 → RustDesk Server**（中文环境下可能名为 **远程桌面**）
-
-## 使用指南
-
-1. 进入界面的 **核心管理** 选项卡，点击下载核心程序（`hbbs` 和 `hbbr`）。
-2. 在基础设置中，勾选启用 ID 服务器和中继服务器。
-3. 保存并应用，从状态栏复制 **公钥 (Public Key)** 填入客户端即可连接。
-
-## 致谢 (Acknowledgements)
-
-本项目深受 [**superzjg**](https://github.com/superzjg) 开发的 [luci-app-rustdesk-server](https://github.com/superzjg/luci-app-rustdesk-server) 启发，并向其致敬。我们由衷感谢 superzjg 为开源社区做出的卓越贡献！
+3. 访问后台：**服务 → RustDesk Server** (中文环境下名为 **远程桌面**)

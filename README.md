@@ -2,22 +2,13 @@
 
 [English](README.md) | [中文](README_zh.md)
 
-LuCI web interface for managing [RustDesk Server](https://github.com/rustdesk/rustdeskd) on OpenWrt.
+**luci-app-rustdeskd** is a web interface for OpenWrt routers to manage your own **RustDesk Remote Desktop Server** (an open-source alternative to TeamViewer). By installing this plugin, you can easily turn your router into a private, self-hosted remote control server.
 
-RustDesk is a full-featured open source remote control alternative to TeamViewer and AnyDesk. This LuCI application provides a web-based interface to configure and manage the self-hosted RustDesk server components (hbbs and hbbr) on OpenWrt routers.
+## Core Features
 
-## Features
-
-- **Service Management** - Start/Stop/Restart services directly from the UI
-- **Core Downloader** - One-click download and update for the official RustDesk server core
-- **Status & Logs** - Real-time service monitoring and log viewer
-- **Configuration** - Easy management of ports, keys, and advanced options
-- **Native Backup** - Fully integrates with OpenWrt's native backup/restore system
-- **Security** - Built-in data validation and safe execution
-
-## Requirements
-- OpenWrt 23.05 or later with LuCI installed
-- `luci-base`, `rpcd`, `rpcd-mod-ucode`
+- **One-Click Core Installer**: No need for complex terminal commands. Download and update the official RustDesk server core (`hbbs` and `hbbr`) directly from the web UI.
+- **Data Backup & Restore**: Fully integrates with OpenWrt's backup system. Easily backup and restore your encryption keys and database with a single click.
+- **Visual Configuration**: Manage ports, keys, and view real-time service logs directly from the LuCI interface.
 
 ## Installation
 
@@ -35,13 +26,3 @@ RustDesk is a full-featured open source remote control alternative to TeamViewer
    ```
 
 3. Access the interface at: **Services → RustDesk Server**
-
-## Usage
-
-1. Go to the **Core Management** tab to download the `hbbs` and `hbbr` binaries.
-2. Enable the ID Server and Relay Server in the General Settings.
-3. Apply settings and copy the **Public Key** for your clients.
-
-## Acknowledgements
-
-This project is heavily inspired by and pays tribute to the original [luci-app-rustdesk-server](https://github.com/superzjg/luci-app-rustdesk-server) created by [**superzjg**](https://github.com/superzjg). We sincerely thank superzjg for pioneering the OpenWrt integration for RustDesk Server!
