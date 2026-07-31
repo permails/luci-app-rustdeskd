@@ -547,3 +547,58 @@ msgstr "恢复备份失败："
 
 msgid "Failed to read file"
 msgstr "读取文件失败"
+
+msgid "Failed: "
+msgstr "失败："
+
+msgid "Failed to execute update: "
+msgstr "执行更新失败："
+
+msgid "Downloading..."
+msgstr "正在下载..."
+
+msgid "Error: "
+msgstr "错误："
+
+
+
+
+
+
+
+msgid "Failed to update core: "
+msgstr "更新核心失败："
+
+msgid "Copied to clipboard"
+msgstr "已复制到剪贴板"
+
+msgid "This will download and install the official RustDesk server core. It may take a minute or two. Continue?"
+msgstr "这将下载并安装官方 RustDesk 服务器核心。可能需要一两分钟。确认继续？"
+
+msgid "Failed to start service: "
+msgstr "启动服务失败："
+
+msgid "Failed to restart service: "
+msgstr "重启服务失败："
+
+msgid "Key regeneration failed: "
+msgstr "重新生成秘钥失败："
+
+msgid "Failed to stop service: "
+msgstr "停止服务失败："
+
+
+
+msgid "Unknown error"
+msgstr "未知错误"
+
+
+
+msgid "Not generated yet"
+msgstr "尚未生成"
+
+msgid "Core downloaded and installed successfully!"
+msgstr "核心下载并安装成功！"
+
+msgid "Collecting data..."
+msgstr "正在收集数据..."
