@@ -182,8 +182,6 @@ const methods = {
 
 	create_backup: {
 		call: function() {
-			init_action('rustdeskd', 'stop');
-			
 			let tmp_tar = '/tmp/rustdesk_backup.tar.gz';
 			safeUnlink(tmp_tar);
 			
@@ -195,9 +193,6 @@ const methods = {
 			// Encode to base64
 			let b64 = execCommand('base64', tmp_tar);
 			safeUnlink(tmp_tar);
-			
-			// Restart service after backup
-			init_action('rustdeskd', 'start');
 			
 			return {
 				success: (b64 != null),
