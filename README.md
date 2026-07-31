@@ -10,19 +10,27 @@
 - **Data Backup & Restore**: Fully integrates with OpenWrt's backup system. Easily backup and restore your encryption keys and database with a single click.
 - **Visual Configuration**: Manage ports, keys, and view real-time service logs directly from the LuCI interface.
 
-## Installation
+## Compilation (OpenWrt SDK)
 
-1. Copy the application files to your OpenWrt device:
-   ```bash
-   cp -r htdocs/luci-static /www/luci-static/
-   cp -r root/* /
-   chmod +x /etc/init.d/rustdeskd
-   ```
+```bash
+# Enter your OpenWrt source directory
+cd openwrt
 
-2. Reload rpcd and clear LuCI cache:
-   ```bash
-   /etc/init.d/rpcd reload
-   rm -rf /tmp/luci-*
-   ```
+# Clone the repository into the package directory
+git clone https://github.com/permails/luci-app-rustdeskd.git package/luci-app-rustdeskd
 
-3. Access the interface at: **Services → RustDesk Server**
+# Update and install feeds
+./scripts/feeds update -a
+./scripts/feeds install -a
+
+# Select the package in menuconfig
+make menuconfig
+# Navigate to: LuCI -> Applications -> luci-app-rustdeskd
+
+# Compile the package
+make package/luci-app-rustdeskd/compile V=s
+```
+
+## Acknowledgements
+
+This project draws inspiration from [luci-app-rustdesk-server](https://github.com/superzjg/luci-app-rustdesk-server) by superzjg.

@@ -10,19 +10,27 @@
 - **原生备份与恢复**：完美整合 OpenWrt 系统机制，一键无损备份/恢复你的服务器加密公私钥和连接数据，换机重装毫无压力。
 - **傻瓜式可视化管理**：提供直观的运行状态、实时日志查看器，让修改端口、管理密钥变得轻而易举。
 
-## 安装指南
+## 源码编译
 
-1. 将文件直接放入 OpenWrt 对应目录：
-   ```bash
-   cp -r htdocs/luci-static /www/luci-static/
-   cp -r root/* /
-   chmod +x /etc/init.d/rustdeskd
-   ```
+```bash
+# 进入你的 OpenWrt 源码根目录
+cd openwrt
 
-2. 刷新服务和缓存：
-   ```bash
-   /etc/init.d/rpcd reload
-   rm -rf /tmp/luci-*
-   ```
+# 将本仓库克隆到 package 目录下
+git clone https://github.com/permails/luci-app-rustdeskd.git package/luci-app-rustdeskd
 
-3. 访问后台：**服务 → RustDesk Server** (中文环境下名为 **远程桌面**)
+# 更新并安装 feeds
+./scripts/feeds update -a
+./scripts/feeds install -a
+
+# 在菜单中选中此插件
+make menuconfig
+# 路径: LuCI -> Applications -> luci-app-rustdeskd
+
+# 开始编译
+make package/luci-app-rustdeskd/compile V=s
+```
+
+## 致谢
+
+本项目部分灵感参考自 superzjg 开发的 [luci-app-rustdesk-server](https://github.com/superzjg/luci-app-rustdesk-server) 项目。
