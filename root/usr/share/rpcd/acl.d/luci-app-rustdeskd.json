@@ -45,7 +45,9 @@
                 "luci.rustdeskd": [
                     "service_action",
                     "regenerate_key",
-                    "update_core"
+                    "update_core",
+                    "create_backup",
+                    "restore_backup"
                 ]
             },
             "cgi-io": [
