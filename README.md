@@ -77,13 +77,6 @@ The RustDesk server binaries (`hbbs`, `hbbr`) must be installed separately. They
 
 ## Installation
 
-### From GitHub Releases (Recommended)
-1. Download the latest `.ipk` package from the [Releases page](https://github.com/permails/luci-app-rustdeskd/releases).
-2. Upload it to the `/tmp` directory on your router and install:
-```bash
-opkg update
-opkg install /tmp/luci-app-rustdeskd_*.ipk
-```
 
 ### From Source (Development)
 ```bash
