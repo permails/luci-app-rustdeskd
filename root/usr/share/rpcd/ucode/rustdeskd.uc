@@ -187,8 +187,10 @@ const methods = {
 			let tmp_tar = '/tmp/rustdesk_backup.tar.gz';
 			safeUnlink(tmp_tar);
 			
-			// Package /etc/rustdesk
-			let tar_res = execCommand('tar', '-czf ' + tmp_tar + ' -C / etc/rustdesk/');
+			// Package /etc/rustdesk and /etc/config/rustdeskd
+			// Make sure /etc/rustdesk exists before tar so it doesn't fail
+			execCommand('mkdir', '-p /etc/rustdesk');
+			let tar_res = execCommand('tar', '-czf ' + tmp_tar + ' -C / etc/rustdesk/ etc/config/rustdeskd');
 			
 			// Encode to base64
 			let b64 = execCommand('base64', tmp_tar);
@@ -235,13 +237,17 @@ const methods = {
 				}
 				
 				if (exit_code === 0) {
-					// Verify it looks like a rustdesk backup (contains etc/rustdesk or similar)
-					// We created backup with `tar -C / etc/rustdesk/`, so inside the tarball there is `etc/rustdesk/...`
-					if (fileExists(extract_dir + '/etc/rustdesk')) {
+					// Verify it looks like a rustdesk backup
+					if (fileExists(extract_dir + '/etc/rustdesk') || fileExists(extract_dir + '/etc/config/rustdeskd')) {
 						// It's valid, move to real location
 						init_action('rustdeskd', 'stop');
-						execCommand('rm', '-rf /etc/rustdesk');
-						execCommand('mv', extract_dir + '/etc/rustdesk /etc/rustdesk');
+						if (fileExists(extract_dir + '/etc/rustdesk')) {
+							execCommand('rm', '-rf /etc/rustdesk');
+							execCommand('mv', extract_dir + '/etc/rustdesk /etc/rustdesk');
+						}
+						if (fileExists(extract_dir + '/etc/config/rustdeskd')) {
+							execCommand('mv', extract_dir + '/etc/config/rustdeskd /etc/config/rustdeskd');
+						}
 						init_action('rustdeskd', 'start');
 					} else {
 						exit_code = 2; // Invalid structure
