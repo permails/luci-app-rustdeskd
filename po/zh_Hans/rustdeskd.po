@@ -411,3 +411,21 @@ msgstr "警告"
 msgid "Yes"
 msgstr "是"
 
+
+msgid "Browse..."
+msgstr "浏览..."
+
+msgid "No file selected"
+msgstr "未选择任何文件"
+
+msgid "Download backup"
+msgstr "下载备份"
+
+msgid "Generate archive"
+msgstr "生成归档"
+
+msgid "Restore backup"
+msgstr "恢复备份"
+
+msgid "Upload archive..."
+msgstr "上传归档..."

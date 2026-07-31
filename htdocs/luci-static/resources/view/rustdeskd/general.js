@@ -240,58 +240,6 @@ function handleCreateBackup(ev) {
 	});
 }
 
-function handleRestoreBackup(ev) {
-	const fileInput = document.getElementById('restore_backup_file');
-	if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
-		ui.addTimeLimitedNotification(null, E('p', _('Please select a backup file first')), 5000, 'warning');
-		return;
-	}
-
-	if (!confirm(_('This will overwrite your existing RustDesk data and restart the service. Are you sure?'))) {
-		return;
-	}
-
-	const btn = document.getElementById('restore_backup_btn');
-	let originalText = '';
-	if (btn) {
-		originalText = btn.textContent;
-		btn.disabled = true;
-		btn.textContent = _('Restoring...');
-	}
-
-	const file = fileInput.files[0];
-	const reader = new FileReader();
-	reader.onload = function(e) {
-		let data = e.target.result;
-		const commaIndex = data.indexOf(',');
-		if (commaIndex > -1) {
-			data = data.substring(commaIndex + 1);
-		}
-		L.resolveDefault(callRestoreBackup(data), {}).then((res) => {
-			if (res && res.success) {
-				ui.addTimeLimitedNotification(null, E('p', _('Backup restored successfully. Service restarted.')), 5000, 'notice');
-				fileInput.value = '';
-			} else {
-				ui.addTimeLimitedNotification(null, E('p', _('Failed to restore backup: ') + (res.error || 'Unknown error')), 5000, 'error');
-			}
-		}).catch((err) => {
-			ui.addTimeLimitedNotification(null, E('p', _('Error: ') + err.message), 5000, 'error');
-		}).finally(() => {
-			if (btn) {
-				btn.disabled = false;
-				btn.textContent = originalText;
-			}
-		});
-	};
-	reader.onerror = function(e) {
-		ui.addTimeLimitedNotification(null, E('p', _('Failed to read file')), 5000, 'error');
-		if (btn) {
-			btn.disabled = false;
-			btn.textContent = originalText;
-		}
-	};
-	reader.readAsDataURL(file);
-}
 
 return view.extend({
 	render() {
@@ -780,83 +728,110 @@ return view.extend({
 
 		
 		/* Backup & Restore Tab */
-		o = s.taboption('backup', form.DummyValue, '_backup_restore');
-		o.render = function() {
-			return E('div', [
-				E('h3', { 'style': 'margin-top: 20px;' }, _('Backup Data')),
-				E('p', {}, _('Download an archive containing your RustDesk public/private keys, device lists, address books, and configurations.')),
-				E('div', { 'style': 'margin-bottom: 30px;' }, [
-					E('button', {
-						'class': 'btn cbi-button cbi-button-action',
-						'id': 'download_backup_btn',
-						'style': 'min-width: 150px; color: #1890ff; border-color: #1890ff; background-color: transparent;',
-						'click': handleCreateBackup
-					}, _('Download Backup'))
-				]),
+		o = s.taboption('backup', form.Button, 'dl_backup', _('Download backup'), _('Download an archive containing your RustDesk public/private keys, device lists, address books, and configurations.'));
+		o.inputstyle = 'action important';
+		o.inputtitle = _('Generate archive');
+		o.onclick = handleCreateBackup;
 
-				E('hr', { 'style': 'margin: 20px 0; border: 0; border-top: 1px solid #eee;' }),
+		o = s.taboption('backup', form.Button, 'restore_backup', _('Restore backup'), _('Restore your RustDesk data from a previously downloaded .tar.gz backup archive. This will overwrite current data and restart the service.'));
+		o.inputstyle = 'action important';
+		o.inputtitle = _('Upload archive...');
+		o.onclick = function(ev) {
+			ev.preventDefault();
+			var fileInput = document.createElement('input');
+			fileInput.type = 'file';
+			fileInput.accept = '.tar.gz';
+			fileInput.style.display = 'none';
+			
+			fileInput.onchange = function(e) {
+				if (e.target.files.length > 0) {
+					var file = e.target.files[0];
+					if (!confirm(_('This will overwrite your existing RustDesk data and restart the service. Are you sure?'))) {
+						return;
+					}
 
-				E('h3', { 'style': 'margin-top: 20px;' }, _('Restore Data')),
-				E('p', {}, _('Restore your RustDesk data from a previously downloaded .tar.gz backup archive.') + ' ' + _('This will overwrite current data and restart the service.')),
-				E('div', { 'style': 'display: flex; align-items: center; gap: 10px; margin-bottom: 20px;' }, [
-					E('input', {
-						'type': 'file',
-						'id': 'restore_backup_file',
-						'accept': '.tar.gz',
-						'style': 'padding: 5px; border: 1px solid #ccc; border-radius: 4px;'
-					}),
-					E('button', {
-						'class': 'btn cbi-button cbi-button-apply',
-						'id': 'restore_backup_btn',
-						'style': 'min-width: 150px; color: #f5222d; border-color: #f5222d; background-color: transparent;',
-						'click': handleRestoreBackup
-					}, _('Restore Backup'))
-				])
-			]);
+					var btn = ev.target;
+					var originalText = btn.textContent;
+					btn.disabled = true;
+					btn.textContent = _('Restoring...');
+
+					var reader = new FileReader();
+					reader.onload = function(evt) {
+						var data = evt.target.result;
+						var commaIndex = data.indexOf(',');
+						if (commaIndex > -1) {
+							data = data.substring(commaIndex + 1);
+						}
+						L.resolveDefault(callRestoreBackup(data), {}).then(function(res) {
+							if (res && res.code === 0) {
+								ui.addTimeLimitedNotification(null, E('p', _('Restore successful. Service restarted.')), 5000, 'success');
+							} else {
+								ui.addTimeLimitedNotification(null, E('p', _('Restore failed: ') + (res ? res.stderr : 'Unknown error')), 5000, 'error');
+							}
+						}).catch(function(err) {
+							ui.addTimeLimitedNotification(null, E('p', _('Restore request failed: ') + err.message), 5000, 'error');
+						}).finally(function() {
+							btn.disabled = false;
+							btn.textContent = originalText;
+						});
+					};
+					reader.readAsDataURL(file);
+				}
+			};
+			document.body.appendChild(fileInput);
+			fileInput.click();
+			document.body.removeChild(fileInput);
 		};
 
 		/* Log Tab */
 		o = s.taboption('log', form.DummyValue, '_syslog');
 		o.render = function() {
-			var container = E('div', {'id': 'rustdesk_log_container', 'style': 'padding: 10px; text-align: left; width: 100%;'}, [
-				E('em', {}, _('Collecting data...'))
-			]);
+			var logTextarea = E('textarea', {
+				'id': 'rustdesk_syslog',
+				'style': 'width: 100%; min-height: 400px; padding: 10px; font-family: monospace; background: #f8f9fa; color: #333; border: 1px solid #ccc; border-radius: 4px; resize: vertical;',
+				'readonly': 'readonly'
+			}, _('Collecting data...'));
 
-			L.require('tools.views').then(function(views) {
-				var logBoxClass = views.LogreadBox('rustdesk', _('RustDesk Server Log'));
-				var logBoxInstance = Object.create(logBoxClass.prototype);
-				
-				Promise.resolve(logBoxInstance.load()).then(function(loglines) {
-					try {
-						var node = logBoxInstance.render(loglines);
-						
-						// Remove the <h2> title since we're in a tab
-						var h2 = node.querySelector('h2');
-						if (h2) h2.parentNode.removeChild(h2);
-						
-						// Hide the useless "pre-filtered for messages related to..." description
-						var descr = node.querySelector('.cbi-section-descr');
-						if (descr) descr.style.display = 'none';
-						
-						// Hide the Facility (类型) and Severity (级别) filter row, it's useless for app logs
-						var facSelect = node.querySelector('#logFacilitySelect');
-						if (facSelect && facSelect.parentNode) {
-							facSelect.parentNode.style.display = 'none';
-						}
-						
-						while (container.firstChild) {
-							container.removeChild(container.firstChild);
-						}
-						container.appendChild(node);
-					} catch (e) {
-						container.innerHTML = 'Error rendering logs: ' + e.message;
+			var scrollBtn = E('button', {
+				'class': 'btn cbi-button',
+				'style': 'margin-top: 10px;',
+				'click': function(ev) {
+					ev.preventDefault();
+					if (logTextarea) {
+						logTextarea.scrollTop = logTextarea.scrollHeight;
 					}
-				}).catch(function(e) {
-					container.innerHTML = 'Error loading logs: ' + e.message;
+				}
+			}, _('Scroll to bottom'));
+
+			poll.add(function() {
+				return fs.exec_direct('/sbin/logread', ['-e', 'rustdesk']).then(function(res) {
+					if (logTextarea) {
+						var isScrolledToBottom = logTextarea.scrollHeight - logTextarea.clientHeight <= logTextarea.scrollTop + 20;
+						
+						var lines = res ? res.trim().split(/\r?\n/) : [];
+						if (lines.length > 500) {
+							lines = lines.slice(-500);
+						}
+						var text = lines.join('\n');
+						
+						if (text !== logTextarea.value) {
+							logTextarea.value = text || _('No log entries found.');
+							if (isScrolledToBottom) {
+								logTextarea.scrollTop = logTextarea.scrollHeight;
+							}
+						}
+					}
+				}).catch(function(err) {
+					if (logTextarea && !logTextarea.value.includes('Error')) {
+						logTextarea.value = _('Failed to load log data: ') + err.message;
+					}
 				});
-			});
-			
-			return container;
+			}, CONSTANTS.POLL_INTERVAL);
+
+			return E('div', { 'style': 'width: 100%;' }, [
+				logTextarea,
+				E('div', { 'style': 'text-align: right;' }, [ scrollBtn ])
+			]);
 		};
 
 		return m.render();
