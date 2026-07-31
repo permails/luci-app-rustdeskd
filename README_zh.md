@@ -77,10 +77,12 @@ RustDesk 服务器核心程序（`hbbs`、`hbbr`）必须单独安装，本软�
 
 ## 安装说明
 
-### 从 OpenWrt 软件源安装
+### 从 GitHub Releases 安装 (推荐)
+1. 从 [Releases 页面](https://github.com/permails/luci-app-rustdeskd/releases) 下载最新的 `.ipk` 安装包。
+2. 上传到路由器的 `/tmp` 目录，然后执行安装：
 ```bash
 opkg update
-opkg install luci-app-rustdeskd
+opkg install /tmp/luci-app-rustdeskd_*.ipk
 ```
 
 ### 源码编译安装 (开发环境)
