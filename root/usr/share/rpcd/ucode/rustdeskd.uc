@@ -196,6 +196,9 @@ const methods = {
 			let b64 = execCommand('base64', tmp_tar);
 			safeUnlink(tmp_tar);
 			
+			// Restart service after backup
+			init_action('rustdeskd', 'start');
+			
 			return {
 				success: (b64 != null),
 				data: b64
