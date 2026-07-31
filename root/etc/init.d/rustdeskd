@@ -64,7 +64,7 @@ start_hbbs() {
 	procd_set_param pidfile /var/run/hbbs.pid
 
 	# Environment variables
-	procd_append_param env "DB_URL=/etc/rustdesk/db_v2.sqlite3"
+	procd_append_param env "DB_URL=/tmp/rustdesk_db_v2.sqlite3"
 	[ "$server_env_always_use_relay" = "1" ] && procd_append_param env "ALWAYS_USE_RELAY=Y"
 	[ -n "$server_env_rust_log" ] && procd_append_param env "RUST_LOG=$server_env_rust_log"
 
@@ -102,6 +102,9 @@ start_hbbr() {
 
 start_service() {
 	mkdir -p "$KEY_DIR"
+	
+	# Restore database from persistent storage to RAM
+	[ -f "$KEY_DIR/db_v2.sqlite3" ] && cp -p "$KEY_DIR/db_v2.sqlite3" /tmp/rustdesk_db_v2.sqlite3
 
 	config_load "$NAME"
 	config_foreach get_config "$NAME"
@@ -117,6 +120,9 @@ start_service() {
 
 stop_service() {
 	logger -t "$NAME" "Service stopping"
+	
+	# Save database to persistent storage
+	[ -f "/tmp/rustdesk_db_v2.sqlite3" ] && cp -p /tmp/rustdesk_db_v2.sqlite3 "$KEY_DIR/db_v2.sqlite3"
 }
 
 service_triggers() {
