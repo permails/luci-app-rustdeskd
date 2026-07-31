@@ -142,6 +142,27 @@ Enable logging in General settings to write service output to `/var/log/rustdesk
 To protect the router's flash memory lifespan, the database is stored in RAM (`/tmp/rustdesk_db_v2.sqlite3`) during runtime. 
 The init script automatically restores the database from `/etc/rustdesk/db_v2.sqlite3` on startup and syncs it back to flash storage when the service stops. This ensures data persistence across normal reboots while minimizing write wear. *(Note: Data generated during the current session may be lost in the event of unexpected power loss.)*
 
+## Backup and Restore
+
+This plugin fully supports OpenWrt's native configuration backup mechanism. All critical RustDesk Server data (including **encryption keys**, **device lists**, **address books**, and **user accounts**) can be easily preserved.
+
+### 1. Automatic Backup (Recommended)
+When upgrading your OpenWrt firmware or generating a backup from the LuCI interface, all critical RustDesk data is **automatically included**.
+This is because the plugin ships with a `/lib/upgrade/keep.d/rustdeskd` rule that forces OpenWrt to back up the entire `/etc/rustdesk/` directory.
+- **To Backup:** Simply navigate to **System → Backup / Flash Firmware → Generate archive** in LuCI. No extra configuration is required.
+- **To Restore:** Upload your `backup.tar.gz` archive. All RustDesk history and keys will be restored seamlessly.
+
+### 2. Manual Backup (For Migration)
+If you only want to extract RustDesk data independently (e.g., to migrate to another router or server), you just need to back up the `/etc/rustdesk/` directory:
+```bash
+# Archives all public/private keys and the SQLite database
+tar -czvf rustdesk_backup.tar.gz /etc/rustdesk/
+```
+**To restore manually:**
+1. **Stop** the RustDesk service in LuCI.
+2. Extract your backup archive over the `/etc/rustdesk/` directory.
+3. **Start** the service to apply the restored data.
+
 ## Client Configuration
 
 After starting the service:
