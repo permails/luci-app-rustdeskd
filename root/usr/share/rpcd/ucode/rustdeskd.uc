@@ -178,6 +178,67 @@ const methods = {
 				exit_code: -1
 			};
 		}
+	},
+
+	create_backup: {
+		call: function() {
+			init_action('rustdeskd', 'stop');
+			
+			let tmp_tar = '/tmp/rustdesk_backup.tar.gz';
+			safeUnlink(tmp_tar);
+			
+			// Package /etc/rustdesk
+			let tar_res = execCommand('tar', '-czf ' + tmp_tar + ' -C / etc/rustdesk/');
+			
+			// Encode to base64
+			let b64 = execCommand('base64', tmp_tar);
+			safeUnlink(tmp_tar);
+			
+			return {
+				success: (b64 != null),
+				data: b64
+			};
+		}
+	},
+
+	restore_backup: {
+		args: { data: 'data' },
+		call: function(req) {
+			if (!req || !req.args || !req.args.data) {
+				return { success: false, error: 'No data provided' };
+			}
+			
+			let tmp_b64 = '/tmp/rustdesk_restore.b64';
+			let tmp_tar = '/tmp/rustdesk_restore.tar.gz';
+			
+			let fs = require('fs');
+			let f = fs.open(tmp_b64, 'w');
+			if (!f) return { success: false, error: 'Failed to create temp file' };
+			f.write(req.args.data);
+			f.close();
+			
+			// Decode base64
+			execCommand('base64', '-d ' + tmp_b64 + ' > ' + tmp_tar);
+			
+			// Extract
+			let exit_code = 1;
+			if (fileExists(tmp_tar)) {
+				// We don't use execCommand for tar extraction because it might print output
+				// Let's use popen to get the exit code properly, or just execCommand
+				execCommand('tar', '-xzf ' + tmp_tar + ' -C /');
+				exit_code = 0; // Assume success if no throw
+			}
+			
+			safeUnlink(tmp_b64);
+			safeUnlink(tmp_tar);
+			
+			if (exit_code === 0) {
+				init_action('rustdeskd', 'start');
+				return { success: true };
+			}
+			
+			return { success: false, error: 'Extraction failed' };
+		}
 	}
 };
 

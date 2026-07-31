@@ -57,6 +57,17 @@ const callUpdateCore = rpc.declare({
 	method: 'update_core'
 });
 
+const callCreateBackup = rpc.declare({
+	object: 'luci.rustdeskd',
+	method: 'create_backup'
+});
+
+const callRestoreBackup = rpc.declare({
+	object: 'luci.rustdeskd',
+	method: 'restore_backup',
+	params: ['data']
+});
+
 const callServiceAction = rpc.declare({
 	object: 'luci.rustdeskd',
 	method: 'service_action',
@@ -199,6 +210,89 @@ function handleUpdateCore(ev) {
 
 
 
+function handleCreateBackup(ev) {
+	const btn = document.getElementById('download_backup_btn');
+	let originalText = '';
+	if (btn) {
+		originalText = btn.textContent;
+		btn.disabled = true;
+		btn.textContent = _('Creating Backup...');
+	}
+	L.resolveDefault(callCreateBackup(), {}).then((res) => {
+		if (res && res.success && res.data) {
+			const a = document.createElement('a');
+			a.href = 'data:application/gzip;base64,' + res.data;
+			a.download = 'rustdesk_backup.tar.gz';
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+			ui.addTimeLimitedNotification(null, E('p', _('Backup downloaded successfully')), 5000, 'notice');
+		} else {
+			ui.addTimeLimitedNotification(null, E('p', _('Failed to create backup')), 5000, 'error');
+		}
+	}).catch((err) => {
+		ui.addTimeLimitedNotification(null, E('p', _('Error: ') + err.message), 5000, 'error');
+	}).finally(() => {
+		if (btn) {
+			btn.disabled = false;
+			btn.textContent = originalText;
+		}
+	});
+}
+
+function handleRestoreBackup(ev) {
+	const fileInput = document.getElementById('restore_backup_file');
+	if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+		ui.addTimeLimitedNotification(null, E('p', _('Please select a backup file first')), 5000, 'warning');
+		return;
+	}
+
+	if (!confirm(_('This will overwrite your existing RustDesk data and restart the service. Are you sure?'))) {
+		return;
+	}
+
+	const btn = document.getElementById('restore_backup_btn');
+	let originalText = '';
+	if (btn) {
+		originalText = btn.textContent;
+		btn.disabled = true;
+		btn.textContent = _('Restoring...');
+	}
+
+	const file = fileInput.files[0];
+	const reader = new FileReader();
+	reader.onload = function(e) {
+		let data = e.target.result;
+		const commaIndex = data.indexOf(',');
+		if (commaIndex > -1) {
+			data = data.substring(commaIndex + 1);
+		}
+		L.resolveDefault(callRestoreBackup(data), {}).then((res) => {
+			if (res && res.success) {
+				ui.addTimeLimitedNotification(null, E('p', _('Backup restored successfully. Service restarted.')), 5000, 'notice');
+				fileInput.value = '';
+			} else {
+				ui.addTimeLimitedNotification(null, E('p', _('Failed to restore backup: ') + (res.error || 'Unknown error')), 5000, 'error');
+			}
+		}).catch((err) => {
+			ui.addTimeLimitedNotification(null, E('p', _('Error: ') + err.message), 5000, 'error');
+		}).finally(() => {
+			if (btn) {
+				btn.disabled = false;
+				btn.textContent = originalText;
+			}
+		});
+	};
+	reader.onerror = function(e) {
+		ui.addTimeLimitedNotification(null, E('p', _('Failed to read file')), 5000, 'error');
+		if (btn) {
+			btn.disabled = false;
+			btn.textContent = originalText;
+		}
+	};
+	reader.readAsDataURL(file);
+}
+
 return view.extend({
 	render() {
 		let m, s, o;
@@ -228,6 +322,7 @@ return view.extend({
 		s.tab('general', _('General'));
 		s.tab('hbbs', _('ID Server (hbbs)'));
 		s.tab('hbbr', _('Relay Server (hbbr)'));
+		s.tab('backup', _('Backup & Restore'));
 		s.tab('log', _('Log'));
 
 		/* General Settings (Custom UI) */
@@ -684,6 +779,42 @@ return view.extend({
 		o.description = _('Start check time for connection downgrade');
 
 		
+		/* Backup & Restore Tab */
+		o = s.taboption('backup', form.DummyValue, '_backup_restore');
+		o.render = function() {
+			return E('div', [
+				E('h3', { 'style': 'margin-top: 20px;' }, _('Backup Data')),
+				E('p', {}, _('Download an archive containing your RustDesk public/private keys, device lists, address books, and configurations.')),
+				E('div', { 'style': 'margin-bottom: 30px;' }, [
+					E('button', {
+						'class': 'btn cbi-button cbi-button-action',
+						'id': 'download_backup_btn',
+						'style': 'min-width: 150px; color: #1890ff; border-color: #1890ff; background-color: transparent;',
+						'click': handleCreateBackup
+					}, _('Download Backup'))
+				]),
+
+				E('hr', { 'style': 'margin: 20px 0; border: 0; border-top: 1px solid #eee;' }),
+
+				E('h3', { 'style': 'margin-top: 20px;' }, _('Restore Data')),
+				E('p', {}, _('Restore your RustDesk data from a previously downloaded .tar.gz backup archive.') + ' ' + _('This will overwrite current data and restart the service.')),
+				E('div', { 'style': 'display: flex; align-items: center; gap: 10px; margin-bottom: 20px;' }, [
+					E('input', {
+						'type': 'file',
+						'id': 'restore_backup_file',
+						'accept': '.tar.gz',
+						'style': 'padding: 5px; border: 1px solid #ccc; border-radius: 4px;'
+					}),
+					E('button', {
+						'class': 'btn cbi-button cbi-button-apply',
+						'id': 'restore_backup_btn',
+						'style': 'min-width: 150px; color: #f5222d; border-color: #f5222d; background-color: transparent;',
+						'click': handleRestoreBackup
+					}, _('Restore Backup'))
+				])
+			]);
+		};
+
 		/* Log Tab */
 		o = s.taboption('log', form.DummyValue, '_syslog');
 		o.render = function() {

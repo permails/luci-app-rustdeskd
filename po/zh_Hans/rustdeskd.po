@@ -496,3 +496,54 @@ msgstr "为您当前的 OpenWrt 架构下载并安装官方 RustDesk 服务器�
 
 msgid "Start will only work if at least \"Enable ID Server\" or \"Enable Relay Server\" is checked in the Configuration section below."
 msgstr "只有在下方配置中至少勾选了“启用 ID 服务器”或“启用中继服务器”时，才能启动服务。"
+
+msgid "Backup & Restore"
+msgstr "备份与恢复"
+
+msgid "Backup Data"
+msgstr "数据备份"
+
+msgid "Download an archive containing your RustDesk public/private keys, device lists, address books, and configurations."
+msgstr "下载包含您的 RustDesk 公钥/私钥、设备列表、地址簿及相关配置的归档文件。"
+
+msgid "Download Backup"
+msgstr "下载备份"
+
+msgid "Creating Backup..."
+msgstr "正在创建备份..."
+
+msgid "Backup downloaded successfully"
+msgstr "备份下载成功"
+
+msgid "Failed to create backup"
+msgstr "创建备份失败"
+
+msgid "Restore Data"
+msgstr "恢复数据"
+
+msgid "Restore your RustDesk data from a previously downloaded .tar.gz backup archive."
+msgstr "从之前下载的 .tar.gz 备份归档中恢复您的 RustDesk 数据。"
+
+msgid "This will overwrite current data and restart the service."
+msgstr "这将会覆盖当前数据并重新启动服务。"
+
+msgid "Restore Backup"
+msgstr "恢复备份"
+
+msgid "Please select a backup file first"
+msgstr "请先选择一个备份文件"
+
+msgid "This will overwrite your existing RustDesk data and restart the service. Are you sure?"
+msgstr "这将覆盖您现有的 RustDesk 数据并重启服务。您确定吗？"
+
+msgid "Restoring..."
+msgstr "正在恢复..."
+
+msgid "Backup restored successfully. Service restarted."
+msgstr "备份恢复成功，服务已重启。"
+
+msgid "Failed to restore backup: "
+msgstr "恢复备份失败："
+
+msgid "Failed to read file"
+msgstr "读取文件失败"
