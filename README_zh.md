@@ -160,3 +160,7 @@ make package/luci-app-rustdeskd/compile
 - **前端验证 (JavaScript)**：所有用户输入在保存至 UCI 配置之前，都会经过类型、字符范围和格式的严格校验。
 - **后端验证 (Init 脚本)**：启动脚本会再次校验端口范围、字符合法性、URL 格式等，过滤任何潜在的危险字符（如 `;|&$\`(){}[]<>'"\\!` 等）。
 - **RPC 后端验证 (ucode)**：严格限制了允许执行的服务动作白名单。
+
+## 致谢 (Acknowledgements)
+
+本项目深受 [**superzjg**](https://github.com/superzjg) 开发的 [luci-app-rustdesk-server](https://github.com/superzjg/luci-app-rustdesk-server) 启发，并向其致敬。我们由衷感谢 superzjg 为开源社区做出的卓越贡献，他率先实现了 RustDesk Server 在 OpenWrt 上的 LuCI 图形化集成，为本项目的诞生提供了宝贵的思路和基础！

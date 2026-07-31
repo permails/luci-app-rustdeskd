@@ -208,3 +208,7 @@ Invalid values are rejected and logged with warnings to syslog.
 The RPC backend (`rustdeskd.uc`) validates:
 - `service_action`: Whitelist of allowed actions (`start`, `stop`, `restart`, `reload`, `enable`, `disable`)
 - `get_log` lines parameter: Clamped to range 10-1000
+
+## Acknowledgements
+
+This project is heavily inspired by and pays tribute to the original [luci-app-rustdesk-server](https://github.com/superzjg/luci-app-rustdesk-server) created by [**superzjg**](https://github.com/superzjg). We sincerely thank superzjg for pioneering the OpenWrt integration for RustDesk Server and providing a great foundation for the community!
