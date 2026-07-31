@@ -139,7 +139,7 @@ make package/luci-app-rustdeskd/compile
 在常规设置中启用日志记录即可将服务输出保存至 `/var/log/rustdeskd.log`。可通过“日志”选项卡实时查看。
 
 ### 数据库路径
-数据库存储在 `/tmp/rustdesk_db_v2.sqlite3`。此目录不会持久化保存，设备重启后会清空。这是为了适应 OpenWrt 等嵌入式系统存储空间有限的特性。
+数据库默认存储在 `/etc/rustdesk/db_v2.sqlite3`。此目录会随路由器配置一起保存，以确保在重启后保留地址簿、用户和设备连接记录等数据。
 
 ## 客户端配置
 

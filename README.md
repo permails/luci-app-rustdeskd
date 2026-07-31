@@ -139,7 +139,7 @@ The standard RustDesk port layout is:
 Enable logging in General settings to write service output to `/var/log/rustdeskd.log`. View logs in real-time using the Logs tab.
 
 ### Database Location
-The database is stored in `/tmp/rustdesk_db_v2.sqlite3`. This is a non-persistent location and will be cleared on reboot. This is intentional for embedded systems like OpenWrt where persistent storage may be limited.
+The database is stored in `/etc/rustdesk/db_v2.sqlite3`. This persistent location ensures that users, address books, and peer connections are retained across device reboots.
 
 ## Client Configuration
 

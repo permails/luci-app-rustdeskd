@@ -64,7 +64,7 @@ start_hbbs() {
 	procd_set_param pidfile /var/run/hbbs.pid
 
 	# Environment variables
-	procd_append_param env "DB_URL=/tmp/rustdesk_db_v2.sqlite3"
+	procd_append_param env "DB_URL=/etc/rustdesk/db_v2.sqlite3"
 	[ "$server_env_always_use_relay" = "1" ] && procd_append_param env "ALWAYS_USE_RELAY=Y"
 	[ -n "$server_env_rust_log" ] && procd_append_param env "RUST_LOG=$server_env_rust_log"
 
