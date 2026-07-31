@@ -50,31 +50,7 @@ luci-app-rustdeskd/
 - `rpcd-mod-ucode` - rpcd 的 ucode 支持
 
 ### RustDesk 服务器核心
-RustDesk 服务器核心程序（`hbbs`、`hbbr`）必须单独安装，本软件包**不包含**核心文件。你也可以直接在插件界面中点击“下载 / 更新核心”按钮进行自动下载和安装。
-
-#### 手动安装 RustDesk 服务器核心
-
-1. **从 GitHub Releases 下载：**
-   ```bash
-   # 检查你的架构
-   uname -m
-   
-   # 从以下地址下载对应的核心：
-   # https://github.com/rustdesk/rustdeskd/releases
-   
-   # 以 aarch64 为例：
-   wget https://github.com/rustdesk/rustdeskd/releases/download/1.1.11/rustdeskd-linux-arm64v8.zip
-   unzip rustdeskd-linux-arm64v8.zip
-   cp amd64/hbbs amd64/hbbr /usr/bin/
-   chmod +x /usr/bin/hbbs /usr/bin/hbbr
-   ```
-
-2. **验证安装：**
-   ```bash
-   /usr/bin/hbbs --version
-   /usr/bin/hbbr --version
-   ```
-
+RustDesk 服务器核心程序（`hbbs`、`hbbr`）必须单独安装，本软件包**不包含**核心文件。你也可以直接在插件界面中点击“核心管理”选项卡里的“下载 / 更新核心”按钮进行自动下载和安装。
 ## 安装说明
 
 

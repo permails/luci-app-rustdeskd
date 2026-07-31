@@ -50,31 +50,7 @@ luci-app-rustdeskd/
 - `rpcd-mod-ucode` - ucode support for rpcd
 
 ### RustDesk Server Binaries
-The RustDesk server binaries (`hbbs`, `hbbr`) must be installed separately. They are **not included** in this package. However, you can download them directly from the UI using the "Download / Update Core" button.
-
-#### Manual Installation of RustDesk Server Binaries
-
-1. **Download from GitHub Releases:**
-   ```bash
-   # Check your architecture
-   uname -m
-   
-   # Download appropriate binaries from:
-   # https://github.com/rustdesk/rustdeskd/releases
-   
-   # Example for aarch64:
-   wget https://github.com/rustdesk/rustdeskd/releases/download/1.1.11/rustdeskd-linux-arm64v8.zip
-   unzip rustdeskd-linux-arm64v8.zip
-   cp amd64/hbbs amd64/hbbr /usr/bin/
-   chmod +x /usr/bin/hbbs /usr/bin/hbbr
-   ```
-
-2. **Verify installation:**
-   ```bash
-   /usr/bin/hbbs --version
-   /usr/bin/hbbr --version
-   ```
-
+The RustDesk server binaries (`hbbs`, `hbbr`) must be installed separately. They are **not included** in this package. However, you can download and update them directly from the UI using the "Download / Update Core" button in the "Core Management" tab.
 ## Installation
 
 
