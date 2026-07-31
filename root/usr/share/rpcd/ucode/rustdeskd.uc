@@ -210,6 +210,7 @@ const methods = {
 			
 			let tmp_b64 = '/tmp/rustdesk_restore.b64';
 			let tmp_tar = '/tmp/rustdesk_restore.tar.gz';
+			let extract_dir = '/tmp/rustdesk_extract';
 			
 			let fs = require('fs');
 			let f = fs.open(tmp_b64, 'w');
@@ -220,24 +221,46 @@ const methods = {
 			// Decode base64
 			execCommand('base64', '-d ' + tmp_b64 + ' > ' + tmp_tar);
 			
-			// Extract
 			let exit_code = 1;
 			if (fileExists(tmp_tar)) {
-				// We don't use execCommand for tar extraction because it might print output
-				// Let's use popen to get the exit code properly, or just execCommand
-				execCommand('tar', '-xzf ' + tmp_tar + ' -C /');
-				exit_code = 0; // Assume success if no throw
+				// Clean and create extract dir
+				execCommand('rm', '-rf ' + extract_dir);
+				execCommand('mkdir', '-p ' + extract_dir);
+				
+				// Extract to temp dir, check exit code
+				let pp = popen('tar -xzf ' + tmp_tar + ' -C ' + extract_dir, 'r');
+				if (pp) {
+					pp.read('all');
+					exit_code = pp.close();
+				}
+				
+				if (exit_code === 0) {
+					// Verify it looks like a rustdesk backup (contains etc/rustdesk or similar)
+					// We created backup with `tar -C / etc/rustdesk/`, so inside the tarball there is `etc/rustdesk/...`
+					if (fileExists(extract_dir + '/etc/rustdesk')) {
+						// It's valid, move to real location
+						init_action('rustdeskd', 'stop');
+						execCommand('rm', '-rf /etc/rustdesk');
+						execCommand('mv', extract_dir + '/etc/rustdesk /etc/rustdesk');
+						init_action('rustdeskd', 'start');
+					} else {
+						exit_code = 2; // Invalid structure
+					}
+				}
 			}
 			
+			// Cleanup
 			safeUnlink(tmp_b64);
 			safeUnlink(tmp_tar);
+			execCommand('rm', '-rf ' + extract_dir);
 			
 			if (exit_code === 0) {
-				init_action('rustdeskd', 'start');
 				return { success: true };
+			} else if (exit_code === 2) {
+				return { success: false, error: 'Invalid backup format' };
 			}
 			
-			return { success: false, error: 'Extraction failed' };
+			return { success: false, error: 'Extraction failed or corrupted file' };
 		}
 	}
 };
