@@ -5,12 +5,19 @@ LOG_TAG="rustdeskd-update"
 BIN_DIR="/usr/bin"
 TMP_ZIP="/tmp/rustdesk-server.zip"
 TMP_DIR="/tmp/rustdesk-server-extract"
+LOCK_DIR="/tmp/rustdeskd-update.lock"
 RELEASE_API="https://api.github.com/repos/rustdesk/rustdesk-server/releases/latest"
 
 log() {
 	logger -t "$LOG_TAG" "$1"
 	echo "$1"
 }
+
+if ! mkdir "$LOCK_DIR" 2>/dev/null; then
+	log "Error: Another core update is already running."
+	exit 1
+fi
+trap 'rm -rf "$LOCK_DIR"' EXIT
 
 # 1. Detect Architecture
 ARCH=$(uname -m)
