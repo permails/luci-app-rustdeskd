@@ -57,6 +57,11 @@ const callUpdateCore = rpc.declare({
 	method: 'update_core'
 });
 
+const callUpdateCoreStatus = rpc.declare({
+	object: 'luci.rustdeskd',
+	method: 'update_core_status'
+});
+
 const callCreateBackup = rpc.declare({
 	object: 'luci.rustdeskd',
 	method: 'create_backup'
@@ -186,7 +191,17 @@ function handleUpdateCore(ev) {
 		btn.textContent = _('Downloading...');
 	}
 
+	const waitForUpdate = () => L.resolveDefault(callUpdateCoreStatus(), {}).then((res) => {
+		if (!res || res.running)
+			return new Promise((resolve) => window.setTimeout(resolve, 2000)).then(waitForUpdate);
+		return res;
+	});
+
 	L.resolveDefault(callUpdateCore(), {}).then((res) => {
+		if (!res || !res.success)
+			return res;
+		return waitForUpdate();
+	}).then((res) => {
 		if (res && res.success) {
 			ui.addTimeLimitedNotification(null, E('p', _('Core downloaded and installed successfully!')), 5000, 'notice');
 		} else {
