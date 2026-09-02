@@ -6,6 +6,9 @@ import { process_list, init_enabled, init_action } from 'luci.sys';
 
 const BIN_DIR = '/usr/bin';
 const KEY_DIR = '/etc/rustdesk';
+const UPDATE_LOG = '/tmp/rustdeskd-update.log';
+const UPDATE_EXIT = '/tmp/rustdeskd-update.exit';
+const UPDATE_LOCK = '/tmp/rustdeskd-update.lock';
 
 /*
  * Helper functions to reduce code duplication
@@ -161,14 +164,23 @@ const methods = {
 
 	update_core: {
 		call: function() {
-			let pp = popen('/usr/libexec/rustdeskd-update.sh', 'r');
-			let output = '';
+			if (fileExists(UPDATE_LOCK)) {
+				return {
+					success: false,
+					output: 'Another core update is already running',
+					exit_code: -1
+				};
+			}
+			safeUnlink(UPDATE_LOG);
+			safeUnlink(UPDATE_EXIT);
+			let cmd = `( /usr/libexec/rustdeskd-update.sh; echo $? > ${UPDATE_EXIT} ) > ${UPDATE_LOG} 2>&1 </dev/null &`;
+			let pp = popen(cmd, 'r');
 			if (pp) {
-				output = pp.read('all');
+				pp.read('all');
 				let code = pp.close();
 				return {
 					success: (code === 0),
-					output: output,
+					output: (code === 0) ? 'Update started' : 'Failed to start update',
 					exit_code: code
 				};
 			}
@@ -176,6 +188,22 @@ const methods = {
 				success: false,
 				output: 'Failed to execute script',
 				exit_code: -1
+			};
+		}
+	},
+
+	update_core_status: {
+		call: function() {
+			let exit_code = readFileContent(UPDATE_EXIT);
+			let running = fileExists(UPDATE_LOCK);
+			let output = readfile(UPDATE_LOG) || '';
+			if (!running && exit_code === null)
+				output = output || 'Core update was interrupted';
+			return {
+				running: running,
+				success: (exit_code === '0'),
+				output: output,
+				exit_code: (exit_code === null) ? null : +exit_code
 			};
 		}
 	},
