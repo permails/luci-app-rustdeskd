@@ -9,7 +9,8 @@
                 "luci.rustdeskd": [
                     "get_status",
                     "get_public_key",
-                    "get_version"
+                    "get_version",
+                    "update_core_status"
                 ],
                 "log": [
                     "read"
@@ -20,6 +21,9 @@
                 ]
             },
             "file": {
+                "/sbin/logread -e rustdesk": [
+                    "exec"
+                ],
                 "/usr/bin/hbbs": [
                     "read"
                 ],
